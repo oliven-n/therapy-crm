@@ -38,6 +38,14 @@ export type Client = {
   raw_import: Record<string, string | null> | null
 }
 
+export type StageHistoryEntry = {
+  id: number
+  from_stage: Stage | null
+  to_stage: Stage
+  changed_at: string
+  changed_by_email: string | null
+}
+
 /** Phones are stored E.164 (+19175550142); staff read them formatted. */
 export function formatPhone(value: string | null): string {
   if (!value) return ''

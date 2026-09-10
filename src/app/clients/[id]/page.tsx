@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ClientForm } from '@/components/ClientForm'
 import { StageBadge } from '@/components/StageBadge'
 import { updateClientRecord } from '@/app/actions'
-import { ageFrom, formatDate, type Client } from '@/lib/types'
+import { ageFrom, formatDate, type Client, type StageHistoryEntry } from '@/lib/types'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -17,10 +17,20 @@ const SOURCE_LABEL: Record<Client['source'], string> = {
 export default async function ClientPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('clients').select('*').eq('id', id).maybeSingle()
+  const [{ data }, { data: historyRows }] = await Promise.all([
+    supabase.from('clients').select('*').eq('id', id).maybeSingle(),
+    supabase
+      .from('client_stage_history')
+      .select('id, from_stage, to_stage, changed_at, changed_by_email')
+      .eq('client_id', id)
+      .order('changed_at', { ascending: false }),
+  ])
   if (!data) notFound()
 
   const client = data as Client
+  const history = (historyRows ?? []) as StageHistoryEntry[]
+  const when = (iso: string) =>
+    new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
   const age = ageFrom(client.date_of_birth)
   const updateAction = updateClientRecord.bind(null, client.id)
 
@@ -45,6 +55,36 @@ export default async function ClientPage({ params }: Props) {
       <div className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <ClientForm action={updateAction} initial={client} mode="staff" submitLabel="Save changes" />
       </div>
+
+      <section className="mt-6 rounded-lg border border-slate-200 bg-white">
+        <h2 className="border-b border-slate-100 px-4 py-3 text-sm font-medium text-slate-700">
+          Stage history
+        </h2>
+        <ol className="divide-y divide-slate-100">
+          {history.map((h) => (
+            <li key={h.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5 text-sm">
+              <span className="text-slate-800">
+                {h.from_stage ? (
+                  <>
+                    {h.from_stage} <span className="text-slate-400">→</span> <strong>{h.to_stage}</strong>
+                  </>
+                ) : (
+                  <>
+                    Created as <strong>{h.to_stage}</strong>
+                  </>
+                )}
+              </span>
+              <span className="text-slate-500">{when(h.changed_at)}</span>
+              <span className="text-slate-500">
+                {h.changed_by_email ? `by ${h.changed_by_email}` : 'by intake form / import'}
+              </span>
+            </li>
+          ))}
+          {history.length === 0 && (
+            <li className="px-4 py-3 text-sm text-slate-500">No stage changes recorded yet.</li>
+          )}
+        </ol>
+      </section>
 
       {client.raw_import && (
         <details className="mt-6 rounded-lg border border-slate-200 bg-white">

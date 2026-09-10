@@ -168,14 +168,29 @@ export async function updateClientRecord(
   const fieldErrors = { ...contact.fieldErrors, ...pipeline.fieldErrors }
   if (Object.keys(fieldErrors).length) return { fieldErrors }
 
-  const { error } = await supabase
+  // Optimistic concurrency. The form carries the updated_at it was rendered
+  // with; the update applies only if the row still has that value. If a
+  // colleague saved first, zero rows match and we refuse rather than silently
+  // overwriting their edit with this form's stale copy of every field.
+  const seen = field(fd, 'updated_at')
+  let query = supabase
     .from('clients')
     .update({ ...contact.values, ...pipeline.values })
     .eq('id', id)
+  if (seen) query = query.eq('updated_at', seen)
+
+  const { data, error } = await query.select('id')
 
   if (error) {
     console.error('client update failed:', error.message)
     return { error: 'Could not save changes.' }
+  }
+  if (!data || data.length === 0) {
+    return {
+      error:
+        'Someone else saved changes to this client while you were editing. ' +
+        'Reload the page to see their version, then reapply yours.',
+    }
   }
 
   revalidateClientViews(id)

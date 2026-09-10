@@ -58,6 +58,10 @@ export function ClientForm({ action, initial = {}, mode, submitLabel }: Props) {
         </div>
       )}
 
+      {/* Version the form was rendered from; the update action refuses to
+          overwrite a row that has changed since. See updateClientRecord. */}
+      {initial.updated_at && <input type="hidden" name="updated_at" value={initial.updated_at} />}
+
       {/* Honeypot for the public form. Hidden from people, visible to naive bots. */}
       {!staff && (
         <div className="hidden" aria-hidden="true">
