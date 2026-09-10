@@ -1,5 +1,7 @@
 # Therapy Practice CRM
 
+**Live:** https://therapy-crm-rho.vercel.app — public intake at `/intake`, staff sign-in at `/login`.
+
 A prototype CRM for a couples and family therapy practice: a public intake form,
 a searchable client list, per-client profiles, and a stage pipeline — replacing a
 manual chain of re-keying form submissions between spreadsheets.
@@ -142,4 +144,4 @@ client.
 - [x] Client list with search and filters
 - [x] Client profile and editing
 - [x] Stage pipeline board
-- [ ] Deployed to Vercel
+- [x] Deployed to Vercel
