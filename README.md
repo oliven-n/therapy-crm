@@ -1,6 +1,7 @@
 # Therapy Practice CRM
 
 **Live:** https://therapy-crm-rho.vercel.app — public intake at `/intake`, staff sign-in at `/login`.
+**Follow-up questions for the client:** [QUESTIONS.md](QUESTIONS.md)
 
 A prototype CRM for a couples and family therapy practice: a public intake form,
 a searchable client list, per-client profiles, and a stage pipeline — replacing a
