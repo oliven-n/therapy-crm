@@ -52,6 +52,20 @@ privileges explicitly — and grants `anon` none. An anonymous caller is refused
 the SQL permission layer before RLS is consulted, so a mistake in a policy still
 cannot leak client records. RLS is the second lock, not the only one.
 
+**Stage changes are recorded by the database, not the app.** A trigger on
+`clients` appends to `client_stage_history` whenever the stage changes, with a
+timestamp and the acting staff member's id and email from `auth.uid()`. That
+works because staff writes go through the user's own session rather than the
+service key — the attribution is a direct payoff of that earlier decision.
+Writes from the intake form or the CSV import run as `service_role` and are
+recorded with no user, which is accurate. The app holds no insert grant on the
+history table; the trigger is its only writer.
+
+**Concurrent edits can't silently overwrite each other.** The profile form
+carries the `updated_at` it was rendered from, and the save applies only if the
+row still has that value. Whoever saves second is told to reload rather than
+having their stale copy of every field win.
+
 **Search and filters live in the URL**, not in React state. `?stage=Booked&q=<term>`
 re-runs the server component with new query parameters, so filtering happens in
 Postgres rather than by shipping every row to the browser. Results stay
@@ -145,4 +159,5 @@ client.
 - [x] Client list with search and filters
 - [x] Client profile and editing
 - [x] Stage pipeline board
+- [x] Stage history with staff attribution; optimistic concurrency on edits
 - [x] Deployed to Vercel
