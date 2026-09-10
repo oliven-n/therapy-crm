@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { InviteForm } from '@/components/InviteForm'
+import { ResendInviteButton } from '@/components/ResendInviteButton'
 
 /**
  * Lists staff accounts and creates invites. Listing users requires the admin
@@ -63,7 +64,14 @@ export default async function TeamPage() {
                 <td className="px-4 py-3 text-slate-600">{fmt(u.created_at)}</td>
                 <td className="px-4 py-3 text-slate-600">{fmt(u.last_sign_in_at)}</td>
                 <td className="px-4 py-3 text-slate-600">
-                  {u.last_sign_in_at ? 'Active' : 'Invited, not yet signed in'}
+                  {u.last_sign_in_at ? (
+                    'Active'
+                  ) : (
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      Invited, not yet signed in
+                      {u.email && <ResendInviteButton email={u.email} />}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

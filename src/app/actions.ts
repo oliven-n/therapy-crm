@@ -284,6 +284,28 @@ export async function inviteStaff(_prev: FormState, fd: FormData): Promise<FormS
   return { saved: true, link }
 }
 
+/**
+ * Fresh link for an invitee who lost theirs. An invite token can't be minted
+ * twice for the same address, but a magic-link token does the same job: it
+ * signs them in through /auth/confirm and lands on /set-password.
+ */
+export async function resendInvite(_prev: FormState, fd: FormData): Promise<FormState> {
+  await requireUser()
+
+  const email = normalizeEmail(field(fd, 'email'))
+  if (!email) return { error: 'Missing email.' }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email })
+  if (error) return { error: error.message }
+
+  const link =
+    `${await siteOrigin()}/auth/confirm` +
+    `?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=magiclink`
+
+  return { saved: true, link }
+}
+
 /** Used after an invite link, and by anyone who wants to change their password. */
 export async function setPassword(_prev: FormState, fd: FormData): Promise<FormState> {
   const { supabase } = await requireUser()

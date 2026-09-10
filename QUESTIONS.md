@@ -90,10 +90,23 @@ work account locks them out of this system too.
 
 ## Smaller things
 
-**11. What should the intake form promise?**
-The thank-you page currently says someone will be in touch "within two
-business days." What's the real commitment, and should the form also send the
-client a confirmation email?
+**11. Should the system send email, and from what address?**
+Right now it sends none, on purpose. Three places it plausibly should:
+
+- *To a prospective client* after they submit the intake form — a confirmation,
+  and what to expect next. (The thank-you page currently promises contact
+  "within two business days"; what's the real commitment?)
+- *To staff* when a new intake arrives, so nobody has to keep checking the list.
+- *To a new staff member* when they're invited. At the moment the inviter gets
+  a link to pass along by hand, which works but is a manual step.
+
+Any of these needs a real sending setup — a practice-owned address like
+`intake@yourpractice.com` on a transactional email service, not the free-tier
+mailer that comes with the database, which is rate-limited to a few messages an
+hour and meant for development. That's a small monthly cost and a DNS change;
+I'd want to know which of the three matter before setting it up. And for the
+client-facing one specifically: is it acceptable for an email to confirm that
+someone contacted a therapy practice, given who else might see their inbox?
 
 **12. Retention.**
 Should records for people who never became clients — leads that went nowhere —
