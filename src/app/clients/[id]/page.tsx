@@ -4,7 +4,15 @@ import { createClient } from '@/lib/supabase/server'
 import { ClientForm } from '@/components/ClientForm'
 import { StageBadge } from '@/components/StageBadge'
 import { updateClientRecord } from '@/app/actions'
-import { ageFrom, formatDate, type Client, type StageHistoryEntry } from '@/lib/types'
+import {
+  ageFrom,
+  formatDate,
+  formatFieldValue,
+  FIELD_LABELS,
+  type Client,
+  type FieldHistoryEntry,
+  type StageHistoryEntry,
+} from '@/lib/types'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -17,20 +25,53 @@ const SOURCE_LABEL: Record<Client['source'], string> = {
 export default async function ClientPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
-  const [{ data }, { data: historyRows }] = await Promise.all([
+  const [{ data }, { data: stageRows }, { data: fieldRows }] = await Promise.all([
     supabase.from('clients').select('*').eq('id', id).maybeSingle(),
     supabase
       .from('client_stage_history')
       .select('id, from_stage, to_stage, changed_at, changed_by_email')
-      .eq('client_id', id)
-      .order('changed_at', { ascending: false }),
+      .eq('client_id', id),
+    supabase
+      .from('client_field_history')
+      .select('id, field, old_value, new_value, changed_at, changed_by_email')
+      .eq('client_id', id),
   ])
   if (!data) notFound()
 
   const client = data as Client
-  const history = (historyRows ?? []) as StageHistoryEntry[]
   const when = (iso: string) =>
     new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+
+  // One timeline: stage moves and field edits interleaved, newest first.
+  type Event = { key: string; at: string; by: string | null; body: React.ReactNode }
+  const events: Event[] = [
+    ...((stageRows ?? []) as StageHistoryEntry[]).map((h) => ({
+      key: `s${h.id}`,
+      at: h.changed_at,
+      by: h.changed_by_email,
+      body: h.from_stage ? (
+        <>
+          Stage: {h.from_stage} <span className="text-slate-400">→</span> <strong>{h.to_stage}</strong>
+        </>
+      ) : (
+        <>
+          Created as <strong>{h.to_stage}</strong>
+        </>
+      ),
+    })),
+    ...((fieldRows ?? []) as FieldHistoryEntry[]).map((h) => ({
+      key: `f${h.id}`,
+      at: h.changed_at,
+      by: h.changed_by_email,
+      body: (
+        <>
+          {FIELD_LABELS[h.field] ?? h.field}:{' '}
+          <span className="text-slate-500 line-through">{formatFieldValue(h.field, h.old_value)}</span>{' '}
+          <span className="text-slate-400">→</span> <strong>{formatFieldValue(h.field, h.new_value)}</strong>
+        </>
+      ),
+    })),
+  ].sort((a, b) => b.at.localeCompare(a.at))
   const age = ageFrom(client.date_of_birth)
   const updateAction = updateClientRecord.bind(null, client.id)
 
@@ -58,30 +99,18 @@ export default async function ClientPage({ params }: Props) {
 
       <section className="mt-6 rounded-lg border border-slate-200 bg-white">
         <h2 className="border-b border-slate-100 px-4 py-3 text-sm font-medium text-slate-700">
-          Stage history
+          History
         </h2>
         <ol className="divide-y divide-slate-100">
-          {history.map((h) => (
-            <li key={h.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5 text-sm">
-              <span className="text-slate-800">
-                {h.from_stage ? (
-                  <>
-                    {h.from_stage} <span className="text-slate-400">→</span> <strong>{h.to_stage}</strong>
-                  </>
-                ) : (
-                  <>
-                    Created as <strong>{h.to_stage}</strong>
-                  </>
-                )}
-              </span>
-              <span className="text-slate-500">{when(h.changed_at)}</span>
-              <span className="text-slate-500">
-                {h.changed_by_email ? `by ${h.changed_by_email}` : 'by intake form / import'}
-              </span>
+          {events.map((e) => (
+            <li key={e.key} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5 text-sm">
+              <span className="text-slate-800">{e.body}</span>
+              <span className="text-slate-500">{when(e.at)}</span>
+              <span className="text-slate-500">{e.by ? `by ${e.by}` : 'by intake form / import'}</span>
             </li>
           ))}
-          {history.length === 0 && (
-            <li className="px-4 py-3 text-sm text-slate-500">No stage changes recorded yet.</li>
+          {events.length === 0 && (
+            <li className="px-4 py-3 text-sm text-slate-500">No changes recorded yet.</li>
           )}
         </ol>
       </section>

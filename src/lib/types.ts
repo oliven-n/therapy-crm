@@ -45,6 +45,38 @@ export type StageHistoryEntry = {
   changed_by_email: string | null
 }
 
+export type FieldHistoryEntry = {
+  id: number
+  field: string
+  old_value: string | null
+  new_value: string | null
+  changed_at: string
+  changed_by_email: string | null
+}
+
+/** Column name -> what staff call it. Anything not listed falls back to the column name. */
+export const FIELD_LABELS: Record<string, string> = {
+  client_name: 'Name',
+  date_of_birth: 'Date of birth',
+  email: 'Email',
+  phone: 'Phone',
+  insurance: 'Insurance',
+  member_id: 'Member ID',
+  reason_for_visit: 'Reason for visit',
+  date_submitted: 'Date submitted',
+  paperwork_complete: 'Paperwork complete',
+  notes: 'Notes',
+}
+
+/** Render a raw history value the way the field is shown elsewhere in the app. */
+export function formatFieldValue(field: string, value: string | null): string {
+  if (value === null || value === '') return '—'
+  if (field === 'phone') return formatPhone(value)
+  if (field === 'date_of_birth' || field === 'date_submitted') return formatDate(value)
+  if (field === 'paperwork_complete') return value === 'true' ? 'Yes' : 'No'
+  return value
+}
+
 /** Phones are stored E.164 (+19175550142); staff read them formatted. */
 export function formatPhone(value: string | null): string {
   if (!value) return ''

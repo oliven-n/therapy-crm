@@ -59,7 +59,11 @@ works because staff writes go through the user's own session rather than the
 service key — the attribution is a direct payoff of that earlier decision.
 Writes from the intake form or the CSV import run as `service_role` and are
 recorded with no user, which is accurate. The app holds no insert grant on the
-history table; the trigger is its only writer.
+history table; the trigger is its only writer. A second trigger does the same
+for every other field — `client_field_history` holds one row per changed
+field per edit, with the previous and new values — so a renamed client, a
+corrected phone number, or an edited note is never silently lost. The profile
+page shows both as one timeline.
 
 **Concurrent edits can't silently overwrite each other.** The profile form
 carries the `updated_at` it was rendered from, and the save applies only if the
@@ -160,4 +164,5 @@ client.
 - [x] Client profile and editing
 - [x] Stage pipeline board
 - [x] Stage history with staff attribution; optimistic concurrency on edits
+- [x] Field-level change history: every edit records old value, new value, when, who
 - [x] Deployed to Vercel
