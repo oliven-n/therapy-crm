@@ -79,20 +79,26 @@ npm run seed:dry   # parse and print, write nothing
 npm run seed       # actually insert
 ```
 
-Create a staff login and close public signup. In the Supabase dashboard:
+Close public signup. In the Supabase dashboard, **Authentication → Sign In /
+Providers → Email**, turn **off** *Allow new users to sign up*. Without this,
+anyone holding the publishable key can call the signup endpoint, become
+`authenticated`, and read every client record. The app has no signup page, but
+the API endpoint exists regardless.
 
-1. **Authentication → Users → Add user** — email and password, with *Auto
-   Confirm User* on. Staff accounts are created here, never through the app.
-2. **Authentication → Sign In / Providers → Email** — turn **off** *Allow new
-   users to sign up*. Without this, anyone holding the publishable key can call
-   the signup endpoint, become `authenticated`, and read every client record.
-   The app has no signup page, but the API endpoint exists regardless.
-
-Then:
+Start the app and create the first staff account:
 
 ```bash
 npm run dev
+npm run invite -- you@example.com
 ```
+
+The invite script prints a one-time link. Open it, choose a password, and you're
+in. Every account after that is created from the **Team** page inside the app,
+the same way: a signed-in staff member enters a colleague's email and gets a
+link to send them. Accounts are never created through the Supabase dashboard.
+
+(For a deployed instance, prefix the command with the live URL so the link
+points there: `SITE_URL=https://your-app.vercel.app npm run invite -- you@example.com`.)
 
 ## Deploying
 
@@ -131,6 +137,7 @@ client.
 - [x] Schema, RLS policies, indexes
 - [x] CSV normalization and seed script
 - [x] Auth (Supabase email/password, session refresh in `proxy.ts`)
+- [x] Staff onboarding by invite link from the Team page; public signup closed
 - [x] Public intake form
 - [x] Client list with search and filters
 - [x] Client profile and editing
