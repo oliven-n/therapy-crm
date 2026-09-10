@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { InviteForm } from '@/components/InviteForm'
 import { ResendInviteButton } from '@/components/ResendInviteButton'
+import { formatDateTime } from '@/lib/types'
 
 /**
  * Lists staff accounts and creates invites. Listing users requires the admin
@@ -20,8 +21,7 @@ export default async function TeamPage() {
   const { data, error } = await admin.auth.admin.listUsers({ perPage: 200 })
   const users = (data?.users ?? []).sort((a, b) => a.created_at.localeCompare(b.created_at))
 
-  const fmt = (iso: string | null | undefined) =>
-    iso ? new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : '—'
+  const fmt = formatDateTime
 
   return (
     <div className="mx-auto max-w-3xl">

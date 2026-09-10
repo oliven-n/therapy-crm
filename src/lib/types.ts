@@ -77,6 +77,22 @@ export function formatFieldValue(field: string, value: string | null): string {
   return value
 }
 
+/**
+ * Pages render on the server, whose clock is UTC, so timestamps must be
+ * formatted in the practice's zone explicitly or staff see times four or five
+ * hours off. One practice, one zone.
+ */
+export const PRACTICE_TIME_ZONE = 'America/New_York'
+
+export function formatDateTime(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('en-US', {
+    timeZone: PRACTICE_TIME_ZONE,
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  })
+}
+
 /** Phones are stored E.164 (+19175550142); staff read them formatted. */
 export function formatPhone(value: string | null): string {
   if (!value) return ''

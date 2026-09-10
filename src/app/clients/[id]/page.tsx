@@ -7,6 +7,7 @@ import { updateClientRecord } from '@/app/actions'
 import {
   ageFrom,
   formatDate,
+  formatDateTime,
   formatFieldValue,
   FIELD_LABELS,
   type Client,
@@ -39,8 +40,7 @@ export default async function ClientPage({ params }: Props) {
   if (!data) notFound()
 
   const client = data as Client
-  const when = (iso: string) =>
-    new Date(iso).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
+  const when = formatDateTime
 
   // One timeline: stage moves and field edits interleaved, newest first.
   type Event = { key: string; at: string; by: string | null; body: React.ReactNode }
@@ -90,7 +90,7 @@ export default async function ClientPage({ params }: Props) {
         )}
         <div><dt className="inline">Submitted </dt><dd className="inline text-slate-700">{formatDate(client.date_submitted)}</dd></div>
         <div><dt className="inline">Source </dt><dd className="inline text-slate-700">{SOURCE_LABEL[client.source]}</dd></div>
-        <div><dt className="inline">Last updated </dt><dd className="inline text-slate-700">{new Date(client.updated_at).toLocaleString('en-US')}</dd></div>
+        <div><dt className="inline">Last updated </dt><dd className="inline text-slate-700">{formatDateTime(client.updated_at)}</dd></div>
       </dl>
 
       <div className="mt-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
