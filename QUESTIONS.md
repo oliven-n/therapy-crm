@@ -116,7 +116,7 @@ on Google Workspace or Microsoft 365? If so, signing in with that account is
 both easier for staff and better for you: when someone leaves, disabling their
 work account locks them out of this system too.
 
-## Smaller things
+## Scope beyond intake
 
 **12. How far should email be integrated into this?**
 Right now the system sends no email at all, on purpose. There's a spectrum,
@@ -146,7 +146,38 @@ a therapy practice, given who else might see their inbox. (The thank-you page
 currently promises contact "within two business days" — what's the real
 commitment?)
 
-**13. Retention.**
+**13. Does the system stop at "Active," or manage clients from there on?**
+The brief describes the problem as getting people *booked*, and that's what's
+built: the pipeline ends when someone becomes an active client. But 500
+sessions a week is an ongoing-care operation, and everything after Active
+currently lives somewhere else. Whether this platform should reach into that
+is the biggest scope question on the list. Some of what "managing current
+clients" could mean, roughly in order of effort:
+
+- **Appointment history on the profile.** A calendar-style view of when each
+  client has been seen. Read-only if appointments are entered by hand; more
+  useful if they come from the scheduling system.
+- **A fuller notes log.** Today a client has one free-text notes field. A
+  dated, attributed log — one entry per call, session, or admin action, with
+  who wrote it — is what most practices actually want, and it's the natural
+  extension of the stage history that already exists.
+- **Therapist calendars, with double-booking warnings.** Each therapist's
+  schedule in the system, and a check when a slot is already taken.
+- **Automated appointment reminders.** A no-reply email (or text) the day
+  before, with what's needed for the visit. Builds on question 12, and has
+  the same "who else sees their inbox" consideration.
+- **A booking tool.** Staff — or eventually clients themselves — book sessions
+  directly in the CRM. This is the point where the system becomes the
+  practice's scheduling system of record, which is a much bigger commitment
+  than a CRM.
+
+I'd want to know two things: which of these, if any, is the goal, and what
+the practice uses for scheduling *today* — because if that tool is working,
+integrating with it may beat rebuilding it.
+
+**14. Retention.**
 Should records for people who never became clients — leads that went nowhere —
 be kept indefinitely, or purged after some period? That's both a privacy and a
-"500 a week adds up" question.
+"500 a week adds up" question. And if the answer to question 13 is "yes, manage
+ongoing care too," the same question applies to clinical notes, where the
+retention rules are stricter and set by state law rather than preference.
