@@ -56,24 +56,37 @@ one on their Team plan, Vercel on Enterprise). That's a hosting-cost decision
 that has to happen before any real data is entered, independent of anything
 in the code. Everything in the current deployment is synthetic.
 
-**8. Who needs what level of access?**
-Right now every staff account can see and edit every client. Do you need
-distinctions — front desk vs. therapists vs. practice manager? Read-only
-roles? The database already enforces access with row-level policies, so adding
-roles is a policy change rather than an application rewrite, but I'd want to
-know the actual roles first.
+**8. Who gets a login, and what should each kind of person be allowed to do?**
+The prototype has one level of access: every staff account can see and edit
+every client, and — this is the part I'd fix first — every account can also
+invite new accounts. That's fine for a demo and wrong for a practice: a newly
+hired therapist shouldn't be able to onboard whoever they like.
+
+I'd guess the real shape is something like:
+
+| Role | Clients | Team |
+|---|---|---|
+| Practice owner / manager | see and edit everything | invite and remove anyone, change roles |
+| Office / intake staff | see and edit everything | invite new hires |
+| Therapist | see (and maybe edit) their own caseload; possibly read-only on others | no |
+
+Is that close? In particular: who is allowed to create accounts, and is there
+anyone who should see client records but not be able to change them? The
+database already enforces access with row-level policies, so this is a policy
+change rather than a rewrite — but I need the actual roles before writing them.
 
 **9. Should clients be assigned to a therapist?**
-Nothing currently links a client to a specific therapist. A practice doing 500
-sessions a week almost certainly has that mapping somewhere. If it belongs in
-the CRM, the natural follow-up is whether a therapist should see only their own
-caseload — which is the same policy mechanism as question 8.
+Nothing currently links a client to a specific therapist, and question 8's
+"own caseload" row depends on that link existing. A practice doing 500
+sessions a week almost certainly has that mapping somewhere. Where does it
+live today, and at what stage does a client get assigned?
 
-**10. How should new staff get accounts?**
-I built invite-only: an existing staff member generates a one-time link from
-inside the app, and public signup is disabled. Is that the right model, or do
-you have an existing identity provider (Google Workspace, Microsoft 365) that
-staff should sign in with instead?
+**10. Sign-in method.**
+Staff currently sign in with an email and password, and accounts are created
+by invitation only — public signup is disabled. Does the practice already run
+on Google Workspace or Microsoft 365? If so, signing in with that account is
+both easier for staff and better for you: when someone leaves, disabling their
+work account locks them out of this system too.
 
 ## Smaller things
 
