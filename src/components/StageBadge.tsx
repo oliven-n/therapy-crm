@@ -6,7 +6,6 @@ const STYLES: Record<Stage, string> = {
   Contacted: 'bg-sky-50 text-sky-700 ring-sky-200',
   Verified: 'bg-violet-50 text-violet-700 ring-violet-200',
   Booked: 'bg-amber-50 text-amber-800 ring-amber-200',
-  'Paperwork Pending': 'bg-orange-50 text-orange-800 ring-orange-200',
   Active: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
 }
 

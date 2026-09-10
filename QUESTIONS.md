@@ -13,17 +13,25 @@ pipeline (kanban) view that was cut from an earlier draft, and built one at
 `/board` since the stage data supports it directly. Is that what you had in
 mind, or should it go?
 
-**2. Are the six stages the real workflow, in that order?**
-The sample data uses New Lead → Contacted → Verified → Booked → Paperwork
-Pending → Active. I kept those exactly, in that order. If the practice's actual
-funnel differs — e.g. insurance verification happens before first contact — the
-board columns and the stage dropdown should follow it.
+**2. Are the stages the real workflow, in that order?**
+The app uses New Lead → Contacted → Verified → Booked → Active. If the
+practice's actual funnel differs — e.g. insurance verification happens before
+first contact — the board columns and the stage dropdown should follow it.
 
-**3. `paperwork_complete` and the "Paperwork Pending" stage overlap.**
-A client can be in the Paperwork Pending stage with `paperwork_complete = true`
-(the sample data has no such case, but nothing prevents it). Is one of these
-redundant, or do they mean different things — say, one for the intake packet
-and one for insurance forms?
+**3. I removed "Paperwork Pending" as a stage. Is the rule I replaced it with right?**
+The sample data had both a "Paperwork Pending" stage *and* a separate
+`paperwork_complete` yes/no field, and the two could disagree. I treated
+paperwork as a condition rather than a place in the funnel: the yes/no field is
+the single record of it, the two clients who were in that stage became Booked
+with paperwork outstanding, and the system now **refuses to mark anyone Active
+until paperwork is complete** — with a message saying why. Two things I'd
+confirm:
+
+- Is that gate correct in practice, or are there cases where someone is
+  legitimately seen before every form is back (e.g. a consent signed at the
+  first session)?
+- Should other transitions be gated too — say, Booked requiring Verified — or
+  is Active the only one that matters?
 
 ## About the data
 

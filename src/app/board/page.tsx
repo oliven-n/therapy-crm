@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { moveStage } from '@/app/actions'
-import { STAGES, formatDate, type Client, type Stage } from '@/lib/types'
+import { STAGES, PAPERWORK_GATE_MESSAGE, formatDate, type Client, type Stage } from '@/lib/types'
+
+type Props = { searchParams: Promise<{ blocked?: string }> }
 
 /**
  * One column per stage, in funnel order. A per-card select + Move form posts
@@ -9,7 +11,8 @@ import { STAGES, formatDate, type Client, type Stage } from '@/lib/types'
  * new leads a week this view is for seeing flow, not finding people -- the
  * list is for that.
  */
-export default async function BoardPage() {
+export default async function BoardPage({ searchParams }: Props) {
+  const { blocked } = await searchParams
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('clients')
@@ -26,6 +29,7 @@ export default async function BoardPage() {
     typeof clients
   >
   for (const c of clients) (byStage[c.stage] ?? byStage['New Lead']).push(c)
+  const blockedClient = blocked ? clients.find((c) => c.id === blocked) : undefined
 
   return (
     <div>
@@ -33,6 +37,14 @@ export default async function BoardPage() {
         <h1 className="text-2xl font-semibold text-slate-900">Pipeline</h1>
         <p className="text-sm text-slate-500">{clients.length} clients</p>
       </div>
+
+      {blockedClient && (
+        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <strong>{blockedClient.client_name}</strong> was not moved. {PAPERWORK_GATE_MESSAGE}{' '}
+          <Link href={`/clients/${blockedClient.id}`} className="underline">Open their profile</Link> to
+          mark paperwork complete first.
+        </p>
+      )}
 
       {error && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">

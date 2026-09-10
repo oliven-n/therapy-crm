@@ -13,7 +13,7 @@ import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { STAGES, type Stage } from '@/lib/types'
+import { STAGES, PG_CHECK_VIOLATION, PAPERWORK_GATE_MESSAGE, type Stage } from '@/lib/types'
 import { cleanText, normalizeEmail, normalizePhone } from '@/lib/normalize'
 
 export type FormState = {
@@ -92,11 +92,16 @@ function parsePipelineFields(fd: FormData) {
     fieldErrors.date_submitted = 'Enter a valid date.'
   }
 
+  const paperwork_complete = fd.get('paperwork_complete') === 'on'
+  // Same rule the database enforces; checked here so the form gets a field-level
+  // message instead of a generic failure.
+  if (stage === 'Active' && !paperwork_complete) fieldErrors.stage = PAPERWORK_GATE_MESSAGE
+
   return {
     fieldErrors,
     values: {
       stage: stage ?? ('New Lead' as Stage),
-      paperwork_complete: fd.get('paperwork_complete') === 'on',
+      paperwork_complete,
       notes: cleanText(field(fd, 'notes')),
       ...(date_submitted ? { date_submitted } : {}),
     },
@@ -218,9 +223,12 @@ export async function moveStage(fd: FormData): Promise<void> {
   if (from) query = query.eq('stage', from)
 
   const { error } = await query
-  if (error) console.error('stage update failed:', error.message)
-
   revalidateClientViews(id)
+
+  // The database refuses Active without paperwork. Surface that on the board
+  // rather than silently leaving the card where it was.
+  if (error?.code === PG_CHECK_VIOLATION) redirect(`/board?blocked=${id}`)
+  if (error) console.error('stage update failed:', error.message)
 }
 
 // -------------------------------------------------------------------- auth

@@ -6,14 +6,12 @@
  * the order here is the order staff see. Must stay in sync with the
  * clients_stage_valid check constraint in the initial migration.
  */
-export const STAGES = [
-  'New Lead',
-  'Contacted',
-  'Verified',
-  'Booked',
-  'Paperwork Pending',
-  'Active',
-] as const
+export const STAGES = ['New Lead', 'Contacted', 'Verified', 'Booked', 'Active'] as const
+
+/** Postgres check-constraint violation. */
+export const PG_CHECK_VIOLATION = '23514'
+export const PAPERWORK_GATE_MESSAGE =
+  'Paperwork must be marked complete before a client can be made Active.'
 
 export type Stage = (typeof STAGES)[number]
 
@@ -38,10 +36,11 @@ export type Client = {
   raw_import: Record<string, string | null> | null
 }
 
+/** Stages are plain strings here: history may reference stages that no longer exist. */
 export type StageHistoryEntry = {
   id: number
-  from_stage: Stage | null
-  to_stage: Stage
+  from_stage: string | null
+  to_stage: string
   changed_at: string
   changed_by_email: string | null
 }

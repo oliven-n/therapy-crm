@@ -19,9 +19,13 @@ config({ path: '.env.local' })
 
 const CSV_PATH = 'data/therapy_clients_dummy_data.csv'
 
-const VALID_STAGES = [
-  'New Lead', 'Contacted', 'Verified', 'Booked', 'Paperwork Pending', 'Active',
-] as const
+const VALID_STAGES = ['New Lead', 'Contacted', 'Verified', 'Booked', 'Active'] as const
+
+/** Stages that existed in the source data but not in the app. */
+const RETIRED_STAGES: Record<string, (typeof VALID_STAGES)[number]> = {
+  // Meant "booked, forms not back" -- the paperwork_complete flag carries that now.
+  'paperwork pending': 'Booked',
+}
 
 const MONTHS: Record<string, number> = {
   jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
@@ -128,6 +132,11 @@ function normalizeStage(raw: string, label: string): string {
   const s = raw.trim()
   const hit = VALID_STAGES.find((v) => v.toLowerCase() === s.toLowerCase())
   if (hit) return hit
+  const retired = RETIRED_STAGES[s.toLowerCase()]
+  if (retired) {
+    warnings.push(`${label}: retired stage "${s}" -- stored as ${retired}`)
+    return retired
+  }
   warnings.push(`${label}: unknown stage "${s}" -- defaulted to New Lead`)
   return 'New Lead'
 }
