@@ -43,6 +43,9 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             <div className="flex items-center gap-3">
               {user ? (
                 <>
+                  <Link href="/intake" className={navLink} title="Preview the public intake form">
+                    Intake form
+                  </Link>
                   <span className="hidden text-sm text-slate-500 sm:inline">{user.email}</span>
                   <form action={signOut}>
                     <button type="submit" className={navLink}>Sign out</button>

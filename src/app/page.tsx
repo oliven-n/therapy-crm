@@ -1,6 +1,15 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
-export default function Home() {
+/** Public landing page. Signed-in staff have no business here; send them to work. */
+export default async function Home() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) redirect('/clients')
+
   return (
     <div className="mx-auto max-w-2xl py-16 text-center">
       <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
