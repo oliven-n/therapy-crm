@@ -43,12 +43,12 @@ to bring them in, each step a real increase in scope:
    question of where files are kept and who can open them.
 2. **Send the forms from the CRM.** One click emails a client the intake
    packet, and the system records when it went out. Needs the email setup
-   from question 13.
+   from question 14.
 3. **E-signature.** The client signs in the browser, the signed copy lands on
    their profile, and the paperwork flag flips itself. This is the version
    that removes the most manual work — and the one with the most moving parts
    (a signature provider, legal validity of e-signed consent in your state,
-   and definitely a BAA, per question 9).
+   and definitely a BAA, per question 10).
 
 Which of these is worth having, and which forms are we talking about —
 intake questionnaire, consent, HIPAA notice, financial agreement?
@@ -114,14 +114,24 @@ wrong often enough that I'd rather ask.
 
 ## About access
 
-**9. Prototype, or on a path to real client records?**
+**9. Any age requirements?**
+The form accepts any date of birth. Is the practice adults-only, or does it
+see minors? If minors: a client under 18 generally needs a parent or guardian
+as the contact and consenting party, which means the form needs guardian
+fields that appear based on the birth date entered, and the record needs to
+distinguish the client from the person responsible for them. It also changes
+the couples/family logic in question 7 — a parent and a child on one insurance
+plan is a family case, not a couple. If adults-only, the form can say so and
+refuse a date of birth under 18 with a clear message.
+
+**10. Prototype, or on a path to real client records?**
 If real: these are health records, HIPAA applies, and neither Supabase's nor
 Vercel's free tier will sign a Business Associate Agreement (Supabase offers
 one on their Team plan, Vercel on Enterprise). That's a hosting-cost decision
 that has to happen before any real data is entered, independent of anything
 in the code. Everything in the current deployment is synthetic.
 
-**10. Who gets a login, and what should each kind of person be allowed to do?**
+**11. Who gets a login, and what should each kind of person be allowed to do?**
 The prototype has one level of access: every staff account can see and edit
 every client, and — this is the part I'd fix first — every account can also
 invite new accounts. That's fine for a demo and wrong for a practice: a newly
@@ -140,13 +150,13 @@ anyone who should see client records but not be able to change them? The
 database already enforces access with row-level policies, so this is a policy
 change rather than a rewrite — but I need the actual roles before writing them.
 
-**11. Should clients be assigned to a therapist?**
-Nothing currently links a client to a specific therapist, and question 10's
+**12. Should clients be assigned to a therapist?**
+Nothing currently links a client to a specific therapist, and question 11's
 "own caseload" row depends on that link existing. A practice doing 500
 sessions a week almost certainly has that mapping somewhere. Where does it
 live today, and at what stage does a client get assigned?
 
-**12. Sign-in method.**
+**13. Sign-in method.**
 Staff currently sign in with an email and password, and accounts are created
 by invitation only — public signup is disabled. Does the practice already run
 on Google Workspace or Microsoft 365? If so, signing in with that account is
@@ -155,7 +165,7 @@ work account locks them out of this system too.
 
 ## Scope beyond intake
 
-**13. How far should email be integrated into this?**
+**14. How far should email be integrated into this?**
 Right now the system sends no email at all, on purpose. There's a spectrum,
 and where you want to land on it changes the build considerably:
 
@@ -183,7 +193,7 @@ a therapy practice, given who else might see their inbox. (The thank-you page
 currently promises contact "within two business days" — what's the real
 commitment?)
 
-**14. Does the system stop at "Active," or manage clients from there on?**
+**15. Does the system stop at "Active," or manage clients from there on?**
 The brief describes the problem as getting people *booked*, and that's what's
 built: the pipeline ends when someone becomes an active client. But 500
 sessions a week is an ongoing-care operation, and everything after Active
@@ -201,7 +211,7 @@ clients" could mean, roughly in order of effort:
 - **Therapist calendars, with double-booking warnings.** Each therapist's
   schedule in the system, and a check when a slot is already taken.
 - **Automated appointment reminders.** A no-reply email (or text) the day
-  before, with what's needed for the visit. Builds on question 13, and has
+  before, with what's needed for the visit. Builds on question 14, and has
   the same "who else sees their inbox" consideration.
 - **A booking tool.** Staff — or eventually clients themselves — book sessions
   directly in the CRM. This is the point where the system becomes the
@@ -212,9 +222,9 @@ I'd want to know two things: which of these, if any, is the goal, and what
 the practice uses for scheduling *today* — because if that tool is working,
 integrating with it may beat rebuilding it.
 
-**15. Retention.**
+**16. Retention.**
 Should records for people who never became clients — leads that went nowhere —
 be kept indefinitely, or purged after some period? That's both a privacy and a
-"500 a week adds up" question. And if the answer to question 14 is "yes, manage
+"500 a week adds up" question. And if the answer to question 15 is "yes, manage
 ongoing care too," the same question applies to clinical notes, where the
 retention rules are stricter and set by state law rather than preference.
