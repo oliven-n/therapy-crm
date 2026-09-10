@@ -35,6 +35,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
                   <Link href="/clients" className={navLink}>Clients</Link>
                   <Link href="/board" className={navLink}>Board</Link>
                   <Link href="/clients/new" className={navLink}>+ Add client</Link>
+                  <Link href="/team" className={navLink}>Team</Link>
                 </div>
               )}
             </div>

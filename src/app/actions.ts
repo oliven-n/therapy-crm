@@ -10,6 +10,7 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { STAGES, type Stage } from '@/lib/types'
@@ -19,6 +20,8 @@ export type FormState = {
   error?: string
   fieldErrors?: Record<string, string>
   saved?: boolean
+  /** inviteStaff only: the one-time link for the new account. */
+  link?: string
 } | null
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -213,4 +216,58 @@ export async function signOut(): Promise<void> {
   const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/login')
+}
+
+/** Where this deployment lives, for building links that come back to it. */
+async function siteOrigin(): Promise<string> {
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000'
+  const proto = h.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
+  return `${proto}://${host}`
+}
+
+// ------------------------------------------------------------------- staff accounts
+
+/**
+ * Staff onboard staff. Public signup is disabled in Supabase, so this is the
+ * only way an account comes into existence after the first one.
+ *
+ * Rather than relying on Supabase's rate-limited built-in mailer, this asks
+ * Supabase to mint the same one-time invite token it would have emailed and
+ * hands the resulting link back to the inviter to pass on. Opening the link
+ * signs the invitee in and sends them to choose a password.
+ */
+export async function inviteStaff(_prev: FormState, fd: FormData): Promise<FormState> {
+  await requireUser()
+
+  const email = normalizeEmail(field(fd, 'email'))
+  if (!email || !EMAIL_RE.test(email)) {
+    return { fieldErrors: { email: 'Enter a valid email address.' } }
+  }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.auth.admin.generateLink({ type: 'invite', email })
+  if (error) return { error: error.message }
+
+  const link =
+    `${await siteOrigin()}/auth/confirm` +
+    `?token_hash=${encodeURIComponent(data.properties.hashed_token)}&type=invite`
+
+  revalidatePath('/team')
+  return { saved: true, link }
+}
+
+/** Used after an invite link, and by anyone who wants to change their password. */
+export async function setPassword(_prev: FormState, fd: FormData): Promise<FormState> {
+  const { supabase } = await requireUser()
+
+  const password = field(fd, 'password')
+  const confirm = field(fd, 'confirm')
+  if (password.length < 8) return { fieldErrors: { password: 'Use at least 8 characters.' } }
+  if (password !== confirm) return { fieldErrors: { confirm: 'Passwords do not match.' } }
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: error.message }
+
+  redirect('/clients')
 }

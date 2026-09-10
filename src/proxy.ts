@@ -13,7 +13,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  *      reads regardless, and every server action re-checks the session itself.
  */
 
-const PUBLIC_PATHS = ['/', '/intake', '/login']
+const PUBLIC_PATHS = ['/', '/intake', '/login', '/auth']
 
 function isPublic(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || (p !== '/' && pathname.startsWith(`${p}/`)))
