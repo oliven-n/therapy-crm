@@ -1,0 +1,22 @@
+client_name,date_of_birth,email,phone,insurance,member_id,reason_for_visit,stage,date_submitted,paperwork_complete,notes
+John Smith,04/12/1988,jsmith@gmail.com,(917) 555-0142,Aetna,W123456789,Anxiety and work stress,New Lead,03/04/2025,no,
+sarah CHEN,1990-07-03,SCHEN@YAHOO.COM,917.555.0198,Cigna,C234567890,Communication issues,Contacted,2025-03-05,Y,"Left VM 3/6, will call back"
+Dr. Robert Williams,March 15 1985,rwilliams@gmail.com,+1 917-555-0133,United Healthcare,U998877665,Depression,Verified,03/06/2025,TRUE,
+jennifer lopez,7/9/92,jlopez@gmail.com,(212) 555-0188,Oxford,OXF445566,Individual therapy,Booked,2025-03-07,yes,intake done
+Nguyen, Kevin,12-Mar-1979,knguyen@protonmail.com,917 555 0120,Self-Pay,SP001,"Grief counseling, wants weekly",Paperwork Pending,03/09/2025,no,referred by Dr. Patel
+Maria Garcia,05/22/1981,mgarcia@icloud.com,(347) 555-0161,Cigna,C778899001,Postpartum support,Active,03/10/2025,TRUE,
+Ahmed Hassan,08/30/1995,ahmed.hassan@gmail.com,(917) 555-0155,Aetna,W556677889,Stress and burnout,New Lead,03/10/2025,no,
+Emily O'Brien,1987-11-19,eobrien@company.co,347.555.0177,BCBS,B123450000,"Anxiety, panic attacks",Verified,3/11/2025,yes,"prefers evening appts, telehealth only"
+Sofia Rossi,02/14/1993,SROSSI@GMAIL.COM,(718) 555-0144,United Healthcare,U112233445,Self esteem,New Lead,03/12/2025,no,
+Thomas Baker,06/07/1976,tbaker@yahoo.com,917.555.0166,Oxford,OXF223344,Stress management,Booked,3/12/25,yes,
+Priya Patel,1998-09-25,ppatel@gmail.com,347-555-0199,Cigna,C551122334,Anxiety,Contacted,03/13/2025,N,"still deciding, follow up next week"
+Michael Brown,03/03/1983,mbrown@gmail.com,(917) 555-0109,United Healthcare,U445566778,Depression and insomnia,Paperwork Pending,03/13/2025,no,
+Grace Kim,10/21/1991,gkim@gmail.com,917.555.0111,Self-Pay,SP002,"Trauma, EMDR requested",Verified,2025-03-14,TRUE,wants therapist who does EMDR
+Daniel Lee,05/18/1986,dlee@gmail.com,212.555.0133,BCBS,B998877665,Career counseling,Active,3/15/25,TRUE,
+Rebecca Foster,1994-04-08,rfoster@gmail.com,(917) 555-0117,Aetna,W667788990,Anxiety and depression,Active,03/16/2025,y,"comma in notes, watch out"
+James Wilson,11/30/1980,jwilson@hotmail.com,(917) 555-0102,Cigna,C556677889,"Anger management
+court ordered",Contacted,03/16/2025,no,note has a line break in source data
+Olivia Martinez,02/28/1996,omartinez@gmail.com,347 555 0100,United Healthcare,U778899001,Individual,New Lead,03/17/2025,no,
+Lauren Davis,09/14/1989,ldavis@gmail.com,917.555.0144,Aetna,W667780000,Depression,Booked,2025-03-18,YES,
+henry zhao,04/25/1990,hzhao@gmail.com,(917) 555-0188,BCBS,B112200334,Premarital counseling,New Lead,3/17/2025,no,
+christopher park,1984-06-11,cpark@gmail.com,(917) 555-0155,Oxford,OXF667788,Life transitions,Contacted,03/18/2025,no,
