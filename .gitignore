@@ -42,3 +42,6 @@ next-env.d.ts
 
 # ...but the example file documents required vars and should be committed
 !.env.example
+
+# local Claude Code launcher config
+.claude/

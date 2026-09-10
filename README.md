@@ -79,11 +79,27 @@ npm run seed:dry   # parse and print, write nothing
 npm run seed       # actually insert
 ```
 
+Create a staff login and close public signup. In the Supabase dashboard:
+
+1. **Authentication → Users → Add user** — email and password, with *Auto
+   Confirm User* on. Staff accounts are created here, never through the app.
+2. **Authentication → Sign In / Providers → Email** — turn **off** *Allow new
+   users to sign up*. Without this, anyone holding the publishable key can call
+   the signup endpoint, become `authenticated`, and read every client record.
+   The app has no signup page, but the API endpoint exists regardless.
+
 Then:
 
 ```bash
 npm run dev
 ```
+
+## Deploying
+
+Vercel imports the GitHub repo directly. The only configuration is the same
+three environment variables from `.env.example`, entered under
+**Project Settings → Environment Variables**. Every push to `main` redeploys;
+pushes to other branches get their own preview URL.
 
 ## Data normalization
 
@@ -114,9 +130,9 @@ client.
 
 - [x] Schema, RLS policies, indexes
 - [x] CSV normalization and seed script
-- [ ] Auth
-- [ ] Public intake form
-- [ ] Client list with search and filters
-- [ ] Client profile and editing
-- [ ] Stage pipeline board
+- [x] Auth (Supabase email/password, session refresh in `proxy.ts`)
+- [x] Public intake form
+- [x] Client list with search and filters
+- [x] Client profile and editing
+- [x] Stage pipeline board
 - [ ] Deployed to Vercel
