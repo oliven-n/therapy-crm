@@ -77,9 +77,18 @@ create index clients_date_of_birth_idx  on public.clients (date_of_birth);
 create index clients_insurance_idx      on public.clients (insurance);
 create index clients_date_submitted_idx on public.clients (date_submitted desc);
 
+-- Table privileges.
+--
+-- The project is configured with "automatically expose new tables" OFF, so no
+-- role gets access to this table implicitly. Granting explicitly means `anon`
+-- holds no privileges on public.clients at all -- not merely no RLS policy, but
+-- no SQL-level permission either. An anonymous caller is refused before RLS is
+-- ever consulted, so a mistake in a policy cannot expose client records.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on public.clients to authenticated;
+
 -- Row Level Security: deny by default, then allow signed-in staff.
--- No anon policy exists, so anonymous requests can neither read nor write,
--- even if the anon key leaks.
+-- This is the second of the two locks; the grants above are the first.
 alter table public.clients enable row level security;
 
 create policy "staff can read all clients"

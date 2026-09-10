@@ -43,6 +43,12 @@ which means RLS can be authenticated-only. The alternative — granting `anon` a
 INSERT policy — is harder to fence in correctly, since a careless policy that
 permits writes can easily also permit reading every other client's record.
 
+**Access control is two independent locks.** The Supabase project is configured
+with *automatically expose new tables* off, so the migration grants table
+privileges explicitly — and grants `anon` none. An anonymous caller is refused at
+the SQL permission layer before RLS is consulted, so a mistake in a policy still
+cannot leak client records. RLS is the second lock, not the only one.
+
 **Search and filters live in the URL**, not in React state. `?stage=Booked&q=<term>`
 re-runs the server component with new query parameters, so filtering happens in
 Postgres rather than by shipping every row to the browser. Results stay
