@@ -33,9 +33,29 @@ confirm:
 - Should other transitions be gated too — say, Booked requiring Verified — or
   is Active the only one that matters?
 
+**4. How much of the paperwork itself should live in the CRM?**
+Today the system records only *whether* paperwork is complete — a checkbox.
+The forms themselves live wherever they live now. There's a range of how far
+to bring them in, each step a real increase in scope:
+
+1. **Store the documents.** Staff upload the signed PDFs to a client's profile
+   so everything about a person is in one place. Low effort; mostly a
+   question of where files are kept and who can open them.
+2. **Send the forms from the CRM.** One click emails a client the intake
+   packet, and the system records when it went out. Needs the email setup
+   from question 12.
+3. **E-signature.** The client signs in the browser, the signed copy lands on
+   their profile, and the paperwork flag flips itself. This is the version
+   that removes the most manual work — and the one with the most moving parts
+   (a signature provider, legal validity of e-signed consent in your state,
+   and definitely a BAA, per question 8).
+
+Which of these is worth having, and which forms are we talking about —
+intake questionnaire, consent, HIPAA notice, financial agreement?
+
 ## About the data
 
-**4. Is there a canonical source for dates, and is US ordering safe?**
+**5. Is there a canonical source for dates, and is US ordering safe?**
 The sample CSV has five date formats. Most are unambiguous, but `04/12/1988`
 could be 12 April or 4 December. I assumed US month/day/year because every
 area code is NYC and every insurer is a US carrier, and I preserved the
@@ -43,13 +63,13 @@ original text of every imported row so any wrong guess is recoverable. Where
 does this data actually originate — the website form, a spreadsheet someone
 types into, both?
 
-**5. How should duplicate submissions be handled?**
+**6. How should duplicate submissions be handled?**
 Nothing stops the same person from filling in the intake form twice, or being
 added manually after they already submitted. Should the system flag likely
 duplicates, and on what — email, phone, name + date of birth? Or is that a
 judgment call staff make when they see two similar rows?
 
-**6. Should client names be normalised on entry?**
+**7. Should client names be normalised on entry?**
 The sample data has `sarah CHEN`, `Nguyen, Kevin`, `Dr. Robert Williams`. I
 title-cased and reordered on import, but left the live form as-typed, since
 auto-capitalising real names (`McDonald`, `van der Berg`, `DeShawn`) goes
@@ -57,14 +77,14 @@ wrong often enough that I'd rather ask.
 
 ## About access
 
-**7. Prototype, or on a path to real client records?**
+**8. Prototype, or on a path to real client records?**
 If real: these are health records, HIPAA applies, and neither Supabase's nor
 Vercel's free tier will sign a Business Associate Agreement (Supabase offers
 one on their Team plan, Vercel on Enterprise). That's a hosting-cost decision
 that has to happen before any real data is entered, independent of anything
 in the code. Everything in the current deployment is synthetic.
 
-**8. Who gets a login, and what should each kind of person be allowed to do?**
+**9. Who gets a login, and what should each kind of person be allowed to do?**
 The prototype has one level of access: every staff account can see and edit
 every client, and — this is the part I'd fix first — every account can also
 invite new accounts. That's fine for a demo and wrong for a practice: a newly
@@ -83,13 +103,13 @@ anyone who should see client records but not be able to change them? The
 database already enforces access with row-level policies, so this is a policy
 change rather than a rewrite — but I need the actual roles before writing them.
 
-**9. Should clients be assigned to a therapist?**
-Nothing currently links a client to a specific therapist, and question 8's
+**10. Should clients be assigned to a therapist?**
+Nothing currently links a client to a specific therapist, and question 9's
 "own caseload" row depends on that link existing. A practice doing 500
 sessions a week almost certainly has that mapping somewhere. Where does it
 live today, and at what stage does a client get assigned?
 
-**10. Sign-in method.**
+**11. Sign-in method.**
 Staff currently sign in with an email and password, and accounts are created
 by invitation only — public signup is disabled. Does the practice already run
 on Google Workspace or Microsoft 365? If so, signing in with that account is
@@ -98,25 +118,35 @@ work account locks them out of this system too.
 
 ## Smaller things
 
-**11. Should the system send email, and from what address?**
-Right now it sends none, on purpose. Three places it plausibly should:
+**12. How far should email be integrated into this?**
+Right now the system sends no email at all, on purpose. There's a spectrum,
+and where you want to land on it changes the build considerably:
 
-- *To a prospective client* after they submit the intake form — a confirmation,
-  and what to expect next. (The thank-you page currently promises contact
-  "within two business days"; what's the real commitment?)
-- *To staff* when a new intake arrives, so nobody has to keep checking the list.
-- *To a new staff member* when they're invited. At the moment the inviter gets
-  a link to pass along by hand, which works but is a manual step.
+- **Notifications only.** A confirmation to the client after they submit the
+  intake form; an alert to staff when a new lead arrives; an invite email to
+  new staff instead of a link passed by hand. Modest scope.
+- **Sending things.** Staff email a client their forms, or a link, from inside
+  the CRM, and the send is logged on the profile. Builds on question 4.
+- **Pulling the client in.** Instead of staff re-keying details from a phone
+  call, the CRM emails the client a personal link to fill in or update their
+  own information — contact details, insurance, the intake questionnaire —
+  which lands directly on their record. This is the version that most directly
+  attacks the "data gets re-keyed at every step" problem in the brief, and it
+  means clients get a limited login of their own, which is a bigger security
+  surface than staff-only access.
 
-Any of these needs a real sending setup — a practice-owned address like
-`intake@yourpractice.com` on a transactional email service, not the free-tier
+Any of these needs a real sending address — something like
+`intake@yourpractice.com` on a transactional email service — not the free-tier
 mailer that comes with the database, which is rate-limited to a few messages an
-hour and meant for development. That's a small monthly cost and a DNS change;
-I'd want to know which of the three matter before setting it up. And for the
-client-facing one specifically: is it acceptable for an email to confirm that
-someone contacted a therapy practice, given who else might see their inbox?
+hour and meant for development. Small monthly cost plus a DNS change.
 
-**12. Retention.**
+Two things I'd want settled before building any of it: which tier above is the
+goal, and whether it's acceptable for an email to confirm that someone contacted
+a therapy practice, given who else might see their inbox. (The thank-you page
+currently promises contact "within two business days" — what's the real
+commitment?)
+
+**13. Retention.**
 Should records for people who never became clients — leads that went nowhere —
 be kept indefinitely, or purged after some period? That's both a privacy and a
 "500 a week adds up" question.
