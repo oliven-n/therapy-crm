@@ -62,6 +62,7 @@ export default async function BoardPage() {
                   </p>
                   <form action={moveStage} className="mt-2 flex gap-1">
                     <input type="hidden" name="id" value={c.id} />
+                    <input type="hidden" name="from" value={c.stage} />
                     <select
                       name="stage"
                       defaultValue={c.stage}

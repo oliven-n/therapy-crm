@@ -197,15 +197,27 @@ export async function updateClientRecord(
   return { saved: true }
 }
 
-/** Used by the board's per-card "move to" control. */
+/**
+ * Used by the board's per-card "move to" control.
+ *
+ * The card sends the stage it was rendered in as `from`, and the move applies
+ * only if the row is still there. Otherwise two staff moving the same card at
+ * once would produce a second history entry (Y -> Z) for a transition the
+ * second person never chose -- they chose X -> Z. If the row has moved on, the
+ * board simply re-renders showing where it actually is.
+ */
 export async function moveStage(fd: FormData): Promise<void> {
   const { supabase } = await requireUser()
 
   const id = field(fd, 'id')
+  const from = field(fd, 'from')
   const stage = field(fd, 'stage')
   if (!id || !(STAGES as readonly string[]).includes(stage)) return
 
-  const { error } = await supabase.from('clients').update({ stage }).eq('id', id)
+  let query = supabase.from('clients').update({ stage }).eq('id', id)
+  if (from) query = query.eq('stage', from)
+
+  const { error } = await query
   if (error) console.error('stage update failed:', error.message)
 
   revalidateClientViews(id)
