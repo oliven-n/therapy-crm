@@ -3,14 +3,24 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { InviteForm } from '@/components/InviteForm'
 import { ResendInviteButton } from '@/components/ResendInviteButton'
+import { RemoveStaffButton } from '@/components/RemoveStaffButton'
 import { formatDateTime } from '@/lib/types'
+
+type Props = { searchParams: Promise<{ error?: string }> }
+
+const ERRORS: Record<string, string> = {
+  self: "You can't remove your own account. Ask a colleague to do it.",
+  last: "That's the only account. Removing it would lock everyone out.",
+  failed: 'Could not remove that account. Try again.',
+}
 
 /**
  * Lists staff accounts and creates invites. Listing users requires the admin
  * API, so unlike the client pages this one checks the session explicitly
  * rather than letting RLS refuse an unauthenticated read.
  */
-export default async function TeamPage() {
+export default async function TeamPage({ searchParams }: Props) {
+  const { error: errorCode } = await searchParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -38,6 +48,12 @@ export default async function TeamPage() {
         </div>
       </div>
 
+      {errorCode && ERRORS[errorCode] && (
+        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {ERRORS[errorCode]}
+        </p>
+      )}
+
       {error && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
           Could not list accounts: {error.message}
@@ -52,6 +68,7 @@ export default async function TeamPage() {
               <th className="px-4 py-3">Created</th>
               <th className="px-4 py-3">Last sign-in</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -71,6 +88,11 @@ export default async function TeamPage() {
                       Invited, not yet signed in
                       {u.email && <ResendInviteButton email={u.email} />}
                     </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {u.id !== user.id && users.length > 1 && (
+                    <RemoveStaffButton id={u.id} email={u.email ?? 'this account'} />
                   )}
                 </td>
               </tr>

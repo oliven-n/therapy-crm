@@ -314,6 +314,37 @@ export async function resendInvite(_prev: FormState, fd: FormData): Promise<Form
   return { saved: true, link }
 }
 
+/**
+ * Offboarding. Deleting the auth user locks them out on their next request
+ * (every request re-verifies the session) and leaves their history intact:
+ * both history tables keep changed_by_email, and the user-id column is
+ * `on delete set null`.
+ *
+ * Two guards: you can't remove yourself, and you can't remove the last
+ * account -- either would lock everyone out with no way back in short of
+ * the database console.
+ */
+export async function removeStaff(fd: FormData): Promise<void> {
+  const { user } = await requireUser()
+
+  const id = field(fd, 'id')
+  if (!id) return
+  if (id === user.id) redirect('/team?error=self')
+
+  const admin = createAdminClient()
+  const { data } = await admin.auth.admin.listUsers({ perPage: 200 })
+  if ((data?.users.length ?? 0) <= 1) redirect('/team?error=last')
+
+  const { error } = await admin.auth.admin.deleteUser(id)
+  if (error) {
+    console.error('remove staff failed:', error.message)
+    redirect('/team?error=failed')
+  }
+
+  revalidatePath('/team')
+  redirect('/team')
+}
+
 /** Used after an invite link, and by anyone who wants to change their password. */
 export async function setPassword(_prev: FormState, fd: FormData): Promise<FormState> {
   const { supabase } = await requireUser()
